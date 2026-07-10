@@ -1,0 +1,27 @@
+# Local env file
+.env
+.env*.local
+
+# Database data directory (binary Postgres files)
+volumes/db/data/
+
+# Storage files (if any local uploads exist)
+volumes/storage/
+
+# Logs
+volumes/logs/
+*.log
+
+# Python cache / virtual envs
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.venv/
+venv/
+ENV/
+
+# OS specific files
+.DS_Store
+Thumbs.db

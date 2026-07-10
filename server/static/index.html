@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penalty Championship - Supabase Shootout</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind Custom Style or Vanilla CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Supabase JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Floating Neon Accents -->
+        <div class="glow-bg glow-1"></div>
+        <div class="glow-bg glow-2"></div>
+
+        <!-- AUTH PANEL (Hidden when logged in) -->
+        <div id="auth-panel" class="glass-card active">
+            <div class="brand">
+                <i class="fa-solid fa-circle-nodes logo-icon"></i>
+                <h1>PENALTY<span>CHAMPIONSHIP</span></h1>
+                <p>FastAPI & Supabase Connected Mini-Game</p>
+            </div>
+            
+            <div class="tabs">
+                <button id="tab-login" class="tab-btn active">Log In</button>
+                <button id="tab-signup" class="tab-btn">Sign Up</button>
+            </div>
+
+            <form id="auth-form">
+                <div class="input-group id-nickname-group hidden">
+                    <label for="nickname">Nickname</label>
+                    <div class="input-wrapper">
+                        <i class="fa-regular fa-user"></i>
+                        <input type="text" id="nickname" placeholder="Your Striker Name">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fa-regular fa-envelope"></i>
+                        <input type="email" id="email" placeholder="name@example.com" required>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="password" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <div id="auth-error" class="error-msg hidden">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span id="error-text">Authentication failed.</span>
+                </div>
+
+                <button type="submit" id="auth-submit-btn" class="btn btn-primary">
+                    <span class="btn-text">Proceed to Field</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- GAME PANEL (Hidden until logged in) -->
+        <div id="game-panel" class="hidden">
+            <header class="app-header">
+                <div class="header-brand">
+                    <i class="fa-solid fa-circle-nodes logo-icon-sm"></i>
+                    <h2>PENALTY<span>CHAMPIONSHIP</span></h2>
+                </div>
+                <div class="user-profile">
+                    <span id="user-email"><i class="fa-regular fa-user"></i> email@domain.com</span>
+                    <button id="btn-logout" class="btn btn-logout" title="Sign Out">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </header>
+
+            <main class="game-layout">
+                <!-- LEFT SECTION: Leaderboard & Selection -->
+                <section class="side-panel">
+
+
+                    <!-- Live Leaderboard -->
+                    <div class="glass-card panel-card leaderboard-card">
+                        <h3><i class="fa-solid fa-trophy"></i> Live Leaderboard</h3>
+                        <p class="subtitle">Global database stats (updates real-time):</p>
+                        
+                        <div class="search-wrapper">
+                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                            <input type="text" id="leaderboard-search" placeholder="Search players by name or email..." />
+                        </div>
+                        
+                        <div class="table-container">
+                            <table class="leaderboard-table">
+                                <colgroup>
+                                    <col style="width: 28%;">
+                                    <col style="width: 34%;">
+                                    <col style="width: 12%;">
+                                    <col style="width: 12%;">
+                                    <col style="width: 14%;">
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <th>Player</th>
+                                        <th>Email</th>
+                                        <th>G</th>
+                                        <th>M</th>
+                                        <th>Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboard-body">
+                                    <!-- Populated dynamically -->
+                                    <tr>
+                                        <td colspan="5" class="text-center">Loading leaderboard data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- RIGHT SECTION: Game Canvas & HUD -->
+                <section class="canvas-panel">
+                    <div class="glass-card game-card">
+                        <div class="game-hud">
+                            <div class="hud-item player-name-hud">
+                                <span class="label">ACTIVE STRIKER</span>
+                                <span class="value" id="hud-striker">Select Player</span>
+                            </div>
+                            <div class="hud-item goal-score">
+                                <span class="label">SESSION GOALS</span>
+                                <span class="value goal" id="session-goals">0</span>
+                            </div>
+                            <div class="hud-item miss-score">
+                                <span class="label">SESSION MISSES</span>
+                                <span class="value miss" id="session-misses">0</span>
+                            </div>
+                        </div>
+
+                        <div class="canvas-wrapper">
+                            <canvas id="gameCanvas" width="1600" height="900"></canvas>
+                            
+                            <!-- Next Kick Floating Button (Hidden by default) -->
+                            <button id="btn-next-kick" class="btn btn-next-kick hidden">
+                                <i class="fa-solid fa-rotate-right"></i> Next Kick
+                            </button>
+                            
+                            <!-- Help Overlay -->
+                            <div id="canvas-overlay" class="canvas-overlay active">
+                                <div class="overlay-content">
+                                    <i class="fa-solid fa-hand-pointer pulse-icon"></i>
+                                    <h3>Swipe to Shoot!</h3>
+                                    <p>Click and drag on the football, then release it in the direction of the goal to strike.</p>
+                                    <button class="btn btn-primary" id="btn-start-game">Start Playing</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="game-footer">
+                            <div class="game-tip">
+                                <i class="fa-solid fa-lightbulb"></i>
+                                <span>Tip: Adjust swipe speed for velocity and lift the ball higher by dragging upwards. Watch out for the goalkeeper!</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>
