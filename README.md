@@ -70,6 +70,13 @@ Jeśli chcesz połączyć aplikację z zewnętrznym projektem Supabase (np. w ch
    ```
    *Uwaga: Plik `.env` z Twoimi poufnymi kluczami jest chroniony przed wysłaniem na GitHub przez `.gitignore`.*
 
+3. **Wyłączenie zabezpieczeń RLS (Row Level Security):**
+   Domyślnie chmurowe Supabase blokuje zapis nowym rekordom. Aby gra mogła zapisywać wyniki, musisz wyłączyć RLS dla tabeli `player_stats` w panelu Supabase (*SQL Editor -> New Query*):
+   ```sql
+   ALTER TABLE player_stats DISABLE ROW LEVEL SECURITY;
+   ```
+   *(Alternatywnie możesz dodać reguły zezwalające na SELECT, INSERT, UPDATE dla roli public).*
+
 ---
 
 ## 🐍 Skrypty pomocnicze (w folderze `server/`)
