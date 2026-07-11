@@ -403,10 +403,17 @@ async def proxy_supabase(path: str, request: Request):
             content=body,
             timeout=30.0
         )
+        # Filter out headers that could cause browser decompression/length errors
+        resp_headers = {}
+        exclude_headers = ["content-encoding", "content-length", "transfer-encoding", "connection"]
+        for k, v in response.headers.items():
+            if k.lower() not in exclude_headers:
+                resp_headers[k] = v
+
         return Response(
             content=response.content,
             status_code=response.status_code,
-            headers=dict(response.headers)
+            headers=resp_headers
         )
     except Exception as e:
         logger.error(f"Proxy error: {e}")
