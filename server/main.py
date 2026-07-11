@@ -160,16 +160,17 @@ async def shutdown_event():
         await db_pool.close()
 
 # Token verification dependency
-def verify_token(authorization: str = Header(None)):
+async def verify_token(authorization: str = Header(None)):
     if not authorization:
         raise HTTPException(status_code=401, detail="Missing Authorization Header")
+    
+    parts = authorization.split(" ")
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(status_code=401, detail="Invalid authorization header format")
+    token = parts[1]
+    
+    # 1. Try local decoding first (for backwards compatibility/local testing)
     try:
-        parts = authorization.split(" ")
-        if len(parts) != 2 or parts[0].lower() != "bearer":
-            raise HTTPException(status_code=401, detail="Invalid authorization header format")
-        token = parts[1]
-        
-        # Decode the token
         payload = jwt.decode(
             token,
             JWT_SECRET,
@@ -177,10 +178,34 @@ def verify_token(authorization: str = Header(None)):
             options={"verify_aud": False}
         )
         return payload
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token has expired")
-    except jwt.InvalidTokenError as e:
-        raise HTTPException(status_code=401, detail=f"Invalid token: {str(e)}")
+    except Exception as e:
+        logger.info(f"Local token decoding failed or bypassed: {e}. Trying remote Supabase Auth verification...")
+        
+    # 2. Fallback to calling Supabase Auth API
+    try:
+        headers = {
+            "Authorization": authorization,
+            "apikey": SUPABASE_ANON_KEY
+        }
+        base_url = SUPABASE_URL.rstrip("/")
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{base_url}/auth/v1/user", headers=headers, timeout=10.0)
+            
+        if response.status_code == 200:
+            user_data = response.json()
+            return {
+                "email": user_data.get("email"),
+                "sub": user_data.get("id"),
+                "aud": user_data.get("aud")
+            }
+        else:
+            logger.error(f"Supabase Auth token verification failed with status {response.status_code}: {response.text}")
+            raise HTTPException(status_code=401, detail="Invalid token (failed remote verification)")
+    except HTTPException:
+        raise
+    except Exception as ex:
+        logger.error(f"Error during remote Supabase token verification: {ex}")
+        raise HTTPException(status_code=401, detail=f"Token verification error: {str(ex)}")
 
 class KickRequest(BaseModel):
     player_id: int

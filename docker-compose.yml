@@ -607,7 +607,7 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
-      SUPABASE_URL: http://kong:8000
+      SUPABASE_URL: ${SUPABASE_URL:-http://kong:8000}
       SUPABASE_ANON_KEY: ${ANON_KEY}
 
 volumes:
