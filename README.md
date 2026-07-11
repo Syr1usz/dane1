@@ -44,6 +44,14 @@ Wymagany jest zainstalowany **Docker** oraz **Docker Compose**.
    * Gra i API: [http://localhost:8888](http://localhost:8888)
    * Panel Supabase Studio (dashboard bazy danych): [http://localhost:3000](http://localhost:3000)
 
+### 🔌 Udostępnianie gry online (ngrok)
+
+Aby uruchomić tunel ngrok i udostępnić grę pod adresem z sekcji **Graj online**, wywołaj w konsoli:
+```bash
+ngrok http 8888
+```
+Dzięki temu Twój lokalny serwer na porcie `8888` zostanie wystawiony na zewnątrz pod Twoim statycznym adresem ngrok.
+
 ### 🌐 Integracja z zewnętrznym / chmurowym Supabase (Hosted Supabase)
 
 Jeśli chcesz połączyć aplikację z zewnętrznym projektem Supabase (np. w chmurze Supabase), wykonaj następujące kroki:
