@@ -44,6 +44,24 @@ Wymagany jest zainstalowany **Docker** oraz **Docker Compose**.
    * Gra i API: [http://localhost:8888](http://localhost:8888)
    * Panel Supabase Studio (dashboard bazy danych): [http://localhost:3000](http://localhost:3000)
 
+### 🌐 Integracja z zewnętrznym / chmurowym Supabase (Hosted Supabase)
+
+Jeśli chcesz połączyć aplikację z zewnętrznym projektem Supabase (np. w chmurze Supabase), wykonaj następujące kroki:
+
+1. W pliku `.env` podmień klucze i URL na dane swojego projektu (znajdziesz je w *Project Settings -> API* w panelu Supabase):
+   ```env
+   # Zmień adres na główny URL swojego projektu (bez '/rest/v1' na końcu)
+   SUPABASE_URL=https://twoj-id-projektu.supabase.co
+   
+   # Podmień anon key
+   ANON_KEY=twoj-supabase-anon-key
+   ```
+2. Zbuduj i uruchom ponownie kontener FastAPI:
+   ```bash
+   docker compose up -d --build web-server
+   ```
+   *Uwaga: Plik `.env` z Twoimi poufnymi kluczami jest chroniony przed wysłaniem na GitHub przez `.gitignore`.*
+
 ---
 
 ## 🐍 Skrypty pomocnicze (w folderze `server/`)
